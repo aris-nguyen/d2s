@@ -2,7 +2,7 @@ package io.github.arisnguyen.d2s.dsa.linkedlist;
 
 import java.util.Iterator;
 
-public interface LinkedListADT<T> {
+public interface LinkedListADT<T> extends Iterable<T> {
     int size();
 
     boolean isEmpty();
