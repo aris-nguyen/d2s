@@ -184,12 +184,13 @@ public class DoublyLinkedList<T> implements LinkedListADT<T> {
     public boolean remove(Object object) {
         DoublyNode<T> curNode = this.head;
         while (curNode != null) {
-            if (object == null && curNode.getData() == null) {
+            if ((object == null && curNode.getData() == null) || (Objects.equals(curNode.getData(), object))) {
                 if (this.head == curNode) {
                     DoublyNode<T> removedNode = this.head;
 
                     this.head = this.head.getNext();
-                    this.head.setPrev(null);
+                    if (this.head != null)
+                        this.head.setPrev(null);
 
                     this.size--;
 
@@ -203,7 +204,8 @@ public class DoublyLinkedList<T> implements LinkedListADT<T> {
                     DoublyNode<T> removedNode = this.tail;
 
                     this.tail = this.tail.getPrev();
-                    this.tail.setNext(null);
+                    if (this.tail != null)
+                        this.tail.setNext(null);
 
                     this.size--;
 
@@ -215,22 +217,6 @@ public class DoublyLinkedList<T> implements LinkedListADT<T> {
 
                 curNode.getPrev().setNext(curNode.getNext());
                 curNode.getNext().setPrev(curNode.getPrev());
-
-                this.size--;
-
-                curNode.setData(null);
-                curNode.setPrev(null);
-                curNode.setNext(null);
-
-                return true;
-            }
-
-            if (Objects.equals(curNode.getData(), object)) {
-                if (curNode.getPrev() != null)
-                    curNode.getPrev().setNext(curNode.getNext());
-
-                if (curNode.getNext() != null)
-                    curNode.getNext().setPrev(curNode.getPrev());
 
                 this.size--;
 
@@ -318,5 +304,25 @@ public class DoublyLinkedList<T> implements LinkedListADT<T> {
                 return data;
             }
         };
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("[");
+
+        DoublyNode<T> curNode = this.head;
+        while (curNode != null) {
+            sb.append(curNode.getData());
+
+            if (curNode.getNext() != null) {
+                sb.append(", ");
+            }
+
+            curNode = curNode.getNext();
+        }
+
+        sb.append("]");
+
+        return sb.toString();
     }
 }
