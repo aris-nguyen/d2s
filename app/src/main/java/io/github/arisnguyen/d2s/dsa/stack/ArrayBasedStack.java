@@ -3,7 +3,7 @@ package io.github.arisnguyen.d2s.dsa.stack;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import io.github.arisnguyen.d2s.dsa.array.DynamicArray;
+import io.github.arisnguyen.d2s.dsa.list.array.DynamicArray;
 
 public class ArrayBasedStack<T> implements StackADT<T> {
     private final DynamicArray<T> arr;
