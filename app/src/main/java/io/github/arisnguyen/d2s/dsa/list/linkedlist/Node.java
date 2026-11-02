@@ -1,4 +1,4 @@
-package io.github.arisnguyen.d2s.dsa.linkedlist;
+package io.github.arisnguyen.d2s.dsa.list.linkedlist;
 
 import java.util.Objects;
 

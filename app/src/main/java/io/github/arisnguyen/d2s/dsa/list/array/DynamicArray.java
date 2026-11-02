@@ -1,4 +1,4 @@
-package io.github.arisnguyen.d2s.dsa.array;
+package io.github.arisnguyen.d2s.dsa.list.array;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -32,11 +32,13 @@ public class DynamicArray<T> implements ArrayADT<T>{
 
     @Override
     public T get(int index){
+        if(index < 0 || index >= this.size) throw new IndexOutOfBoundsException();
         return this.arr[index];
     }
 
     @Override
     public void set(int index, T element){
+        if(index < 0 || index >= this.size) throw new IndexOutOfBoundsException();
         this.arr[index] = element;
     }
 
@@ -49,30 +51,67 @@ public class DynamicArray<T> implements ArrayADT<T>{
         this.size = 0;
     }
 
-    @Override
-    public void add(T element){
-        if(this.size >= this.capacity) this.grow();
-
-        this.arr[this.size++] = element;
+    public void add(T data){
+        this.addLast(data);
     }
 
     @Override
-    public void removeAt(int removeIndex){
+    public void addFirst(T data){
+        this.add(0, data);
+    }
+
+    @Override
+    public void addLast(T data){
+        this.add(this.size, data);
+    }
+
+    @Override
+    public void add(int index, T data){
+        if(index < 0 || index > this.size) throw new IndexOutOfBoundsException();
+        if(this.size >= this.capacity) this.grow();
+
+        for(int i = this.size; i > index; i--){
+            this.arr[i] = this.arr[i-1];
+        }
+
+        this.arr[index] = data;
+        this.size++;
+    }
+    
+    @Override 
+    public T removeFirst(){
+        if(isEmpty()) throw new NoSuchElementException("List is empty");
+        return this.removeAt(0);
+    }
+    
+    @Override
+    public T removeLast(){
+        if(isEmpty()) throw new NoSuchElementException("List is empty");
+        return this.removeAt(this.size-1);
+    }
+
+    @Override
+    public T removeAt(int removeIndex){
         if(removeIndex < 0 || removeIndex >= this.size) throw new IndexOutOfBoundsException();
+
+        T data = this.arr[removeIndex];
 
         for(int i = removeIndex; i < this.size-1; i++){
             this.arr[i] = this.arr[i+1];
         }
         this.arr[this.size-1] = null;
         this.size--;
+
+        return data;
     }
 
     @Override
-    public void remove(Object object){
+    public boolean remove(Object object){
         int removeIndex = this.indexOf(object);
-        if(removeIndex < 0) throw new IllegalArgumentException("Object not found");
+        if(removeIndex < 0) return false;
 
         this.removeAt(removeIndex);
+        return true;
     }
 
     @Override

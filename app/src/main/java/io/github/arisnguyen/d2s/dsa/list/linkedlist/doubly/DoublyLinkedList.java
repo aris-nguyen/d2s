@@ -1,10 +1,10 @@
-package io.github.arisnguyen.d2s.dsa.linkedlist.doubly;
+package io.github.arisnguyen.d2s.dsa.list.linkedlist.doubly;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-import io.github.arisnguyen.d2s.dsa.linkedlist.LinkedListADT;
+import io.github.arisnguyen.d2s.dsa.list.linkedlist.LinkedListADT;
 
 public class DoublyLinkedList<T> implements LinkedListADT<T> {
     private DoublyNode<T> head;
@@ -89,9 +89,12 @@ public class DoublyLinkedList<T> implements LinkedListADT<T> {
             prevNode = prevNode.getNext();
         }
 
-        DoublyNode<T> newNode = new DoublyNode<T>(data, prevNode, prevNode.getNext());
+        DoublyNode<T> nextNode = prevNode.getNext();
+        DoublyNode<T> newNode = new DoublyNode<T>(data, prevNode, nextNode);
         prevNode.setNext(newNode);
-        prevNode.getNext().setPrev(newNode);
+        if (nextNode != null) {
+            nextNode.setPrev(newNode);
+        }
         this.size++;
     }
 
@@ -139,6 +142,7 @@ public class DoublyLinkedList<T> implements LinkedListADT<T> {
         DoublyNode<T> removedNode = this.head;
 
         this.head = this.head.getNext();
+        this.head.setPrev(null);
         this.size--;
 
         T data = removedNode.getData();
@@ -186,32 +190,12 @@ public class DoublyLinkedList<T> implements LinkedListADT<T> {
         while (curNode != null) {
             if ((object == null && curNode.getData() == null) || (Objects.equals(curNode.getData(), object))) {
                 if (this.head == curNode) {
-                    DoublyNode<T> removedNode = this.head;
-
-                    this.head = this.head.getNext();
-                    if (this.head != null)
-                        this.head.setPrev(null);
-
-                    this.size--;
-
-                    removedNode.setData(null);
-                    removedNode.setNext(null);
-
+                    removeFirst();
                     return true;
                 }
 
                 if (this.tail == curNode) {
-                    DoublyNode<T> removedNode = this.tail;
-
-                    this.tail = this.tail.getPrev();
-                    if (this.tail != null)
-                        this.tail.setNext(null);
-
-                    this.size--;
-
-                    removedNode.setData(null);
-                    removedNode.setPrev(null);
-
+                    removeLast();
                     return true;
                 }
 
