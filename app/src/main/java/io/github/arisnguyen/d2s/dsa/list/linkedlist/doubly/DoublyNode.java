@@ -1,6 +1,6 @@
-package io.github.arisnguyen.d2s.dsa.linkedlist.doubly;
+package io.github.arisnguyen.d2s.dsa.list.linkedlist.doubly;
 
-import io.github.arisnguyen.d2s.dsa.linkedlist.Node;
+import io.github.arisnguyen.d2s.dsa.list.linkedlist.Node;
 
 public class DoublyNode<T> extends Node<T> {
     private DoublyNode<T> prev;
