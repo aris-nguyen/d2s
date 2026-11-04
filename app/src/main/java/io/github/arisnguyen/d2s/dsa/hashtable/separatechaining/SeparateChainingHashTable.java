@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 
 import io.github.arisnguyen.d2s.dsa.hashtable.HashTableADT;
 import io.github.arisnguyen.d2s.dsa.hashtable.Node;
-import io.github.arisnguyen.d2s.dsa.linkedlist.doubly.DoublyLinkedList;
+import io.github.arisnguyen.d2s.dsa.list.linkedlist.doubly.DoublyLinkedList;
 
 public class SeparateChainingHashTable<K, V> implements HashTableADT<K, V> {
     private static final int DEFAULT_CAPACITY = 10;

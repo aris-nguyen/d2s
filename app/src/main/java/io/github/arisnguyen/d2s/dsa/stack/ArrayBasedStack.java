@@ -3,14 +3,14 @@ package io.github.arisnguyen.d2s.dsa.stack;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import io.github.arisnguyen.d2s.dsa.array.DynamicArray;
+import io.github.arisnguyen.d2s.dsa.list.arraylist.ArrayList;
 
 public class ArrayBasedStack<T> implements StackADT<T> {
-    private final DynamicArray<T> arr;
+    private final ArrayList<T> arr;
     private int index = -1;
     
     public ArrayBasedStack() {
-        this.arr = new DynamicArray<>();
+        this.arr = new ArrayList<>();
     }
 
     @Override
