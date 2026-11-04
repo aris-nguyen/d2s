@@ -1,8 +1,6 @@
-package io.github.arisnguyen.d2s.dsa.linkedlist;
+package io.github.arisnguyen.d2s.dsa.list;
 
-import java.util.Iterator;
-
-public interface LinkedListADT<T> extends Iterable<T> {
+public interface ListADT<T> extends Iterable<T> {
     int size();
 
     boolean isEmpty();
@@ -30,6 +28,4 @@ public interface LinkedListADT<T> extends Iterable<T> {
     int indexOf(Object object);
 
     boolean contains(Object object);
-
-    Iterator<T> iterator();
 }

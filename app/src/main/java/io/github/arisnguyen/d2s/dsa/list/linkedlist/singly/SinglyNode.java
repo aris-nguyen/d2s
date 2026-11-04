@@ -1,6 +1,6 @@
-package io.github.arisnguyen.d2s.dsa.linkedlist.singly;
+package io.github.arisnguyen.d2s.dsa.list.linkedlist.singly;
 
-import io.github.arisnguyen.d2s.dsa.linkedlist.Node;
+import io.github.arisnguyen.d2s.dsa.list.linkedlist.Node;
 
 public class SinglyNode<T> extends Node<T> {
     private SinglyNode<T> next;

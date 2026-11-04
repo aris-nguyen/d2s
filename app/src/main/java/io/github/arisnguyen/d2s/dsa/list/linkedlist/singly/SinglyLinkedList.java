@@ -1,10 +1,10 @@
-package io.github.arisnguyen.d2s.dsa.linkedlist.singly;
+package io.github.arisnguyen.d2s.dsa.list.linkedlist.singly;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-import io.github.arisnguyen.d2s.dsa.linkedlist.LinkedListADT;
+import io.github.arisnguyen.d2s.dsa.list.linkedlist.LinkedListADT;
 
 public class SinglyLinkedList<T> implements LinkedListADT<T> {
 
