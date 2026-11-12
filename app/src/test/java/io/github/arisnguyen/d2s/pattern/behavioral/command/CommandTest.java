@@ -3,52 +3,62 @@ package io.github.arisnguyen.d2s.pattern.behavioral.command;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CommandTest {
 
-    private Light light;
-    private RemoteControl remote;
+    private OrderService orderService;
+    private OrderCommandInvoker invoker;
 
     @BeforeEach
     void setUp() {
-        light = new Light();
-        remote = new RemoteControl();
+        orderService = new OrderService();
+        invoker = new OrderCommandInvoker();
     }
 
     @Test
-    void testTurnOnCommand() {
-        remote.submit(new TurnOnLightCommand(light));
-        assertTrue(light.isOn());
+    void testAddItemCommandExecutesAndUpdatesInventory() {
+        OrderCommand cmd = new AddItemCommand(orderService, "LAPTOP", 3);
+        invoker.executeCommand(cmd);
+
+        assertEquals(3, orderService.getCartQuantity("LAPTOP"));
+        assertEquals(7, orderService.getInventoryStock("LAPTOP")); // initial was 10
+        assertTrue(invoker.canUndo());
     }
 
     @Test
-    void testTurnOffCommand() {
-        light.turnOn();
-        remote.submit(new TurnOffLightCommand(light));
-        assertFalse(light.isOn());
+    void testUndoAddItemCommandRestoresCartAndInventory() {
+        OrderCommand cmd = new AddItemCommand(orderService, "LAPTOP", 2);
+        invoker.executeCommand(cmd);
+
+        invoker.undoLastCommand();
+        assertEquals(0, orderService.getCartQuantity("LAPTOP"));
+        assertEquals(10, orderService.getInventoryStock("LAPTOP"));
+        assertFalse(invoker.canUndo());
     }
 
     @Test
-    void testUndoCommand() {
-        remote.submit(new TurnOnLightCommand(light));
-        assertTrue(light.isOn());
+    void testCancelItemCommand() {
+        // Pre-add item
+        orderService.addItemToCart("PHONE", 5);
 
-        remote.undo();
-        assertFalse(light.isOn());
+        OrderCommand cancelCmd = new CancelItemCommand(orderService, "PHONE", 2);
+        invoker.executeCommand(cancelCmd);
+
+        assertEquals(3, orderService.getCartQuantity("PHONE"));
+        assertEquals(17, orderService.getInventoryStock("PHONE"));
+
+        invoker.undoLastCommand();
+        assertEquals(5, orderService.getCartQuantity("PHONE"));
+        assertEquals(15, orderService.getInventoryStock("PHONE"));
     }
 
     @Test
-    void testMultipleUndo() {
-        remote.submit(new TurnOnLightCommand(light));
-        remote.submit(new TurnOffLightCommand(light));
-        assertFalse(light.isOn());
-
-        remote.undo();
-        assertTrue(light.isOn());
-
-        remote.undo();
-        assertFalse(light.isOn());
+    void testInsufficientInventoryThrows() {
+        OrderCommand excessiveCmd = new AddItemCommand(orderService, "LAPTOP", 15);
+        assertThrows(IllegalStateException.class, () -> invoker.executeCommand(excessiveCmd));
     }
 }

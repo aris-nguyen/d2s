@@ -2,24 +2,25 @@ package io.github.arisnguyen.d2s.pattern.behavioral.command;
 
 public class CommandMain {
     public static void main(String[] args) {
-        Light livingRoomLight = new Light();
-        RemoteControl remote = new RemoteControl();
+        OrderService orderService = new OrderService();
+        OrderCommandInvoker invoker = new OrderCommandInvoker();
 
-        Command turnOn = new TurnOnLightCommand(livingRoomLight);
-        Command turnOff = new TurnOffLightCommand(livingRoomLight);
+        System.out.println("=== Adding Items ===");
+        OrderCommand addLaptops = new AddItemCommand(orderService, "LAPTOP", 2);
+        OrderCommand addPhones = new AddItemCommand(orderService, "PHONE", 3);
 
-        System.out.println("Initial light state: " + livingRoomLight.isOn());
+        invoker.executeCommand(addLaptops);
+        invoker.executeCommand(addPhones);
 
-        remote.submit(turnOn);
-        System.out.println("After turnOn: " + livingRoomLight.isOn());
+        System.out.println("Cart: " + orderService.getCart());
+        System.out.println("Remaining Laptops in inventory: " + orderService.getInventoryStock("LAPTOP"));
 
-        remote.submit(turnOff);
-        System.out.println("After turnOff: " + livingRoomLight.isOn());
+        System.out.println("\n=== Undo Last Action ===");
+        invoker.undoLastCommand(); // Undo adding phones
+        System.out.println("Cart after undo: " + orderService.getCart());
+        System.out.println("Remaining Phones in inventory: " + orderService.getInventoryStock("PHONE"));
 
-        remote.undo();
-        System.out.println("After undo: " + livingRoomLight.isOn());
-
-        remote.undo();
-        System.out.println("After second undo: " + livingRoomLight.isOn());
+        System.out.println("\n=== Audit Log History ===");
+        invoker.getAuditLogs().forEach(System.out::println);
     }
 }
