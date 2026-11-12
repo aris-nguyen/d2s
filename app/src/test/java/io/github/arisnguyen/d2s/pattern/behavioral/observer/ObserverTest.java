@@ -1,38 +1,47 @@
 package io.github.arisnguyen.d2s.pattern.behavioral.observer;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ObserverTest {
 
-    @Test
-    void testObserverReceivesUpdate() {
-        NewsAgency agency = new NewsAgency();
-        NewsChannel ch1 = new NewsChannel("CH1");
-        NewsChannel ch2 = new NewsChannel("CH2");
+    private OrderSubject orderManager;
+    private EmailNotificationService emailService;
+    private InventoryManagementService inventoryService;
 
-        agency.registerObserver(ch1);
-        agency.registerObserver(ch2);
+    @BeforeEach
+    void setUp() {
+        orderManager = new OrderSubject();
+        emailService = new EmailNotificationService();
+        inventoryService = new InventoryManagementService();
 
-        agency.setNews("Market update");
-        assertEquals("Market update", ch1.getNews());
-        assertEquals("Market update", ch2.getNews());
+        orderManager.attach(emailService);
+        orderManager.attach(inventoryService);
     }
 
     @Test
-    void testRemoveObserver() {
-        NewsAgency agency = new NewsAgency();
-        NewsChannel ch1 = new NewsChannel("CH1");
-        NewsChannel ch2 = new NewsChannel("CH2");
+    void testOrderPaidNotifiesBothServices() {
+        OrderEvent paidEvent = new OrderEvent("ORD-1", OrderStatus.PAID, "test@domain.com", 100.0);
+        orderManager.notifyObservers(paidEvent);
 
-        agency.registerObserver(ch1);
-        agency.registerObserver(ch2);
-        agency.removeObserver(ch2);
+        assertEquals(1, emailService.getSentEmails().size());
+        assertTrue(emailService.getSentEmails().get(0).contains("ORD-1 status is now PAID"));
 
-        agency.setNews("Weather update");
-        assertEquals("Weather update", ch1.getNews());
-        assertNull(ch2.getNews());
+        assertEquals(1, inventoryService.getInventoryActions().size());
+        assertTrue(inventoryService.getInventoryActions().get(0).contains("Hold stock for order: ORD-1"));
+    }
+
+    @Test
+    void testDetachObserverStopsReceivingEvents() {
+        orderManager.detach(inventoryService);
+
+        OrderEvent cancelledEvent = new OrderEvent("ORD-2", OrderStatus.CANCELLED, "test@domain.com", 50.0);
+        orderManager.notifyObservers(cancelledEvent);
+
+        assertEquals(1, emailService.getSentEmails().size());
+        assertTrue(inventoryService.getInventoryActions().isEmpty());
     }
 }
