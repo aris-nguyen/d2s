@@ -2,45 +2,59 @@ package io.github.arisnguyen.d2s.pattern.behavioral.interpreter;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InterpreterTest {
 
     @Test
-    void testNumberExpression() {
-        Expression expr = new NumberExpression(42);
-        assertEquals(42, expr.interpret(Map.of()));
+    void testEqualsExpression() {
+        RuleExpression expr = new EqualsExpression("status", "PAID");
+        assertTrue(expr.interpret(new OrderQueryContext(Map.of("status", "PAID"))));
+        assertFalse(expr.interpret(new OrderQueryContext(Map.of("status", "PENDING"))));
+        assertFalse(expr.interpret(new OrderQueryContext(Map.of())));
     }
 
     @Test
-    void testVariableExpression() {
-        Expression expr = new VariableExpression("val");
-        assertEquals(100, expr.interpret(Map.of("val", 100)));
+    void testGreaterThanExpression() {
+        RuleExpression expr = new GreaterThanExpression("total", 100.0);
+        assertTrue(expr.interpret(new OrderQueryContext(Map.of("total", 150.0))));
+        assertFalse(expr.interpret(new OrderQueryContext(Map.of("total", 100.0))));
+        assertFalse(expr.interpret(new OrderQueryContext(Map.of("total", 50.0))));
     }
 
     @Test
-    void testVariableNotFound() {
-        Expression expr = new VariableExpression("missing");
-        assertThrows(IllegalArgumentException.class, () -> expr.interpret(Map.of()));
-    }
-
-    @Test
-    void testAddAndSubtractExpression() {
-        // (a + b) - c -> (20 + 30) - 15 = 35
-        Expression expr = new SubtractExpression(
-                new AddExpression(new VariableExpression("a"), new VariableExpression("b")),
-                new VariableExpression("c")
+    void testComplexDiscountRule() {
+        // (amount > 100 AND customerType == "VIP") OR couponCode == "FREESHIP"
+        RuleExpression rule = new OrExpression(
+                new AndExpression(
+                        new GreaterThanExpression("amount", 100.0),
+                        new EqualsExpression("customerType", "VIP")
+                ),
+                new EqualsExpression("couponCode", "FREESHIP")
         );
 
-        Map<String, Integer> context = new HashMap<>();
-        context.put("a", 20);
-        context.put("b", 30);
-        context.put("c", 15);
+        OrderQueryContext vipPassed = new OrderQueryContext(Map.of(
+                "amount", 120.0,
+                "customerType", "VIP",
+                "couponCode", "NONE"
+        ));
+        assertTrue(rule.interpret(vipPassed));
 
-        assertEquals(35, expr.interpret(context));
+        OrderQueryContext couponPassed = new OrderQueryContext(Map.of(
+                "amount", 20.0,
+                "customerType", "GUEST",
+                "couponCode", "FREESHIP"
+        ));
+        assertTrue(rule.interpret(couponPassed));
+
+        OrderQueryContext failed = new OrderQueryContext(Map.of(
+                "amount", 50.0,
+                "customerType", "GUEST",
+                "couponCode", "NONE"
+        ));
+        assertFalse(rule.interpret(failed));
     }
 }
