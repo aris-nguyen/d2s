@@ -2,17 +2,56 @@ package io.github.arisnguyen.d2s.pattern.behavioral.chain;
 
 public class ChainOfResponsibilityMain {
     public static void main(String[] args) {
-        StringBuilder logSink = new StringBuilder();
-        Logger info = new InfoLogger(logSink);
-        Logger debug = new DebugLogger(logSink);
-        Logger error = new ErrorLogger(logSink);
+        OrderValidationHandler pipeline = new AuthenticationHandler();
+        pipeline.linkWith(new RoleAuthorizationHandler("CUSTOMER"))
+                .linkWith(new RateLimitHandler(60))
+                .linkWith(new CartValidationHandler())
+                .linkWith(new InventoryCheckHandler());
 
-        info.setNext(debug).setNext(error);
+        System.out.println("=== Testing Valid Order ===");
+        OrderContext validOrder = new OrderContext(
+                "ORD-1001",
+                "Bearer secret-valid-token",
+                "CUSTOMER",
+                15,
+                3,
+                10
+        );
+        try {
+            pipeline.validate(validOrder);
+            System.out.println("Order " + validOrder.getOrderId() + " passed all validation checks successfully!");
+        } catch (ValidationException ex) {
+            System.out.println("Validation failed: " + ex.getMessage());
+        }
 
-        info.logMessage(LogLevel.INFO, "System started successfully.");
-        info.logMessage(LogLevel.DEBUG, "Loading user configurations.");
-        info.logMessage(LogLevel.ERROR, "Failed to connect to database!");
+        System.out.println("\n=== Testing Order With Missing Authentication ===");
+        OrderContext unauthenticatedOrder = new OrderContext(
+                "ORD-1002",
+                null,
+                "CUSTOMER",
+                10,
+                1,
+                10
+        );
+        try {
+            pipeline.validate(unauthenticatedOrder);
+        } catch (ValidationException ex) {
+            System.out.println("Validation failed as expected: " + ex.getMessage());
+        }
 
-        System.out.println("Captured Logs:\n" + logSink);
+        System.out.println("\n=== Testing Order With Insufficient Inventory ===");
+        OrderContext outOfStockOrder = new OrderContext(
+                "ORD-1003",
+                "Bearer valid-token",
+                "CUSTOMER",
+                5,
+                20,
+                5
+        );
+        try {
+            pipeline.validate(outOfStockOrder);
+        } catch (ValidationException ex) {
+            System.out.println("Validation failed as expected: " + ex.getMessage());
+        }
     }
 }

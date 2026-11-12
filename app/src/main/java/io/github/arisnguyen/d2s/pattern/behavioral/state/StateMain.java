@@ -2,19 +2,22 @@ package io.github.arisnguyen.d2s.pattern.behavioral.state;
 
 public class StateMain {
     public static void main(String[] args) {
-        AudioPlayer player = new AudioPlayer();
-        System.out.println("Initial status: " + player.getStatus());
+        Order order = new Order("ORD-2026-X");
+        System.out.println("Initial status: " + order.getStatus());
 
-        player.pressPlay();
-        System.out.println("After pressPlay: " + player.getStatus());
+        order.pay();
+        System.out.println("After pay(): " + order.getStatus());
 
-        player.pressPlay();
-        System.out.println("After pressPlay (pause): " + player.getStatus());
+        order.ship();
+        System.out.println("After ship(): " + order.getStatus());
 
-        player.pressPlay();
-        System.out.println("After pressPlay (resume): " + player.getStatus());
+        order.deliver();
+        System.out.println("After deliver(): " + order.getStatus());
 
-        player.pressStop();
-        System.out.println("After pressStop: " + player.getStatus());
+        try {
+            order.cancel();
+        } catch (IllegalStateException ex) {
+            System.out.println("Blocked illegal transition: " + ex.getMessage());
+        }
     }
 }

@@ -3,30 +3,55 @@ package io.github.arisnguyen.d2s.pattern.behavioral.state;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StateTest {
 
     @Test
-    void testStateTransitions() {
-        AudioPlayer player = new AudioPlayer();
-        assertEquals("STOPPED", player.getStatus());
-        assertTrue(player.getState() instanceof StoppedState);
+    void testHappyOrderLifecycle() {
+        Order order = new Order("ORD-HAPPY");
+        assertEquals("CREATED", order.getStatus());
+        assertTrue(order.getState() instanceof CreatedState);
 
-        player.pressPlay();
-        assertEquals("PLAYING", player.getStatus());
-        assertTrue(player.getState() instanceof PlayingState);
+        order.pay();
+        assertEquals("PAID", order.getStatus());
+        assertTrue(order.getState() instanceof PaidState);
 
-        player.pressPlay();
-        assertEquals("PAUSED", player.getStatus());
-        assertTrue(player.getState() instanceof PausedState);
+        order.ship();
+        assertEquals("SHIPPED", order.getStatus());
+        assertTrue(order.getState() instanceof ShippedState);
 
-        player.pressPlay();
-        assertEquals("PLAYING", player.getStatus());
-        assertTrue(player.getState() instanceof PlayingState);
+        order.deliver();
+        assertEquals("DELIVERED", order.getStatus());
+        assertTrue(order.getState() instanceof DeliveredState);
+    }
 
-        player.pressStop();
-        assertEquals("STOPPED", player.getStatus());
-        assertTrue(player.getState() instanceof StoppedState);
+    @Test
+    void testOrderCancellationLifecycle() {
+        Order order = new Order("ORD-CANCEL");
+        order.pay();
+        assertEquals("PAID", order.getStatus());
+
+        order.cancel();
+        assertEquals("CANCELLED", order.getStatus());
+        assertTrue(order.getState() instanceof CancelledState);
+
+        assertThrows(IllegalStateException.class, order::pay);
+        assertThrows(IllegalStateException.class, order::ship);
+    }
+
+    @Test
+    void testInvalidTransitions() {
+        Order order = new Order("ORD-INVALID");
+
+        // Cannot ship before pay
+        assertThrows(IllegalStateException.class, order::ship);
+
+        order.pay();
+        order.ship();
+
+        // Cannot cancel once shipped
+        assertThrows(IllegalStateException.class, order::cancel);
     }
 }
